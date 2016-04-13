@@ -1,5 +1,7 @@
 import sys, os, datetime, time, re
-from nose.tools import nottest
+#from nose2.tools import nottest
+#from nose2.tools import *
+import unittest
 import wp_migrate.cfg as cfg
 import wp_migrate.util as util
 import wp_migrate.flio as flio
@@ -16,9 +18,11 @@ def setup():
     print "\n --- SETUP! --- \n"
     cfg.path='tests/test-files/'
     cfg.old_tbl_prefix='wp_o205dv_'
-    cfg.new_tbl_prefix=''
+    cfg.new_tbl_prefix='xx_'
     cfg.old_domain='www.tpginc.net'
     cfg.new_domain='www.testdomain.org'
+    cfg.inflnm='test_sql.sql'
+    cfg.outflnm='test_sql-new.sql'
 
     #create cfg.parms object & set values
     class p_obj:
@@ -40,16 +44,12 @@ def setup():
     # convert text into list
     _newline = os.linesep
     _sql_list= test_sql.split(_newline)
-    print(_sql_list)
     #build test data file
-    fl=open(cfg.path+'test_sql','w')
+    fl=open(cfg.path+cfg.inflnm,'w')
 
     for rec in _sql_list:
         fl.write(rec+'\n')
     fl.close()
-    assert(True,False)
-
-
 
 
 def teardown():
@@ -58,7 +58,7 @@ def teardown():
     return
     #delete_test_files()
 
-@nottest
+@unittest.skip('')
 def delete_test_files():
     '''(init.delete_test_files) delete test files and directory'''
 
@@ -71,7 +71,7 @@ def delete_test_files():
             os.rmdir(cfg.path+f)
     os.rmdir(cfg.path)
 
-@nottest
+@unittest.skip('')
 def build_test_data(_fl,fnm):
     '''(init.build_test_data) Build the test data from test_sql.
 

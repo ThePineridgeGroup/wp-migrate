@@ -16,50 +16,13 @@ import sys, os, datetime, time, re
 import argparse
 import six
 from six.moves import configparser
+from six.moves import input
 import json,copy
 from collections import OrderedDict
 from decimal import *
 # application modules
 import cfg, flio
 
-
-def config_setup():
-    '''set the values in cfg after parser has set path
-       cfg.xxxx=cfg.parms.xxxx
-    '''
-    # set current path
-    cfg.path=cfg.parms.path+'/'
-
-    #set db and tablename from run parms
-    cfg.sitename='apptest'
-    cfg.dbnm=cfg.sitename+'.sqlite'
-    cfg.tblnm=cfg.sitename
-
-    # see if display on console flag is set
-    if cfg.parms.display == 'n':
-        cfg.display_on_console = False
-    else:
-        cfg.display_on_console = True
-
-
-def config_runparms():
-    '''get the runparms from config file and load in cfg '''
-    print("Get the run parms")
-    co = ConfigOptions()
-    cfg.run_parms = co.get_sectparms('RunParms')
-
-    #build cfg fields from run parms
-
-    #cfg.xxxxx= cfg.run_parms["xxxxx"]
-
-
-    print('Run parms complete.\n')
-
-def prt_cfg_runparms():
-    '''print the run parms from the cfg module'''
-    print('CFG Run Parms        ')
-    print('          xxxxx: {} '.format(cfg.xxxxx))
-    print('')
 
 def fmt_time(_t):
     '''format the time to consistant Decimal '''
@@ -79,7 +42,7 @@ def get_filelist(path=''):
     if os.path.exists(path):
         for (_dirpath, _dirnames, _filenames) in os.walk(path):
             for _f in _filenames:
-                if _f[-4:] == '.txt':
+                if _f[-4:] == '.sql':
                     _filelist.append(_f)
             break            #exit after level 1 directory
     else:
@@ -88,12 +51,6 @@ def get_filelist(path=''):
         _filelist.sort()
     return _filelist
 
-
-def fnd_file(tbl, fn):
-    if fn in tbl:
-        return True
-    else:
-        return False
 
 def get_parser():
     """ get the command line args
@@ -107,9 +64,20 @@ def get_parser():
         WP Migrate is a tool to process the WordPress sql and change
         the table name prefix, if applicable, and domain name.
 
+        A prompt for the following parameters will be shown:
+
+        Path:
+
+        The path is relative to the application root directory or an
+        absolute path.  The ending / must be entered.
+
+        Table Prefix:
+
         The table name prefix is optional and if not used, then is
         skipped.  The prefix is established in the wp-config.php file
         in the php value $table_prefix.
+
+        Domain:
 
         Domain name references are stored in two forms: text and serialized
         text.  The application will scan for the domain name and
@@ -146,130 +114,34 @@ def get_parser():
 def confirm(parms,parser):
     ''' display the parameters for this run and ask for verification '''
 
-    print('\n=============PARMS for False Positive Analysis==============')
-    print('        Running for test: ',parms.path)
+    print('\n============= PARMS for WP Migration ==============')
+    print('        Path to sql file: ',cfg.path)
+    print('                sql file: ',cfg.inflnm)
+    print('            new sql file: ',cfg.outflnm)
     print('')
-    print('===================================================\n')
-    if (parms.verify == 'y') :
-        while (True):
-            usr_resp= input("  Is this correct? (y/n)  ")
-            if (usr_resp =='y') :
-                break
-            elif (usr_resp == 'n'):
-                parser.print_help()
-                exit()
-            else :
+    print('        Old table prefix: ',cfg.old_tbl_prefix)
+    print('        New table prefix: ',cfg.new_tbl_prefix)
+    print('')
+    print('              Old Domain: ',cfg.old_domain)
+    print('              New Domain: ',cfg.new_domain)
+    print('')
+    print('=====================================================\n')
+
+    while (True):
+        usr_resp= input("  Is this correct? (y/n)  ")
+        if (usr_resp =='y') :
+            break
+        elif (usr_resp == 'n'):
+            parser.print_help()
+            exit()
+        else :
                 print("invalid entry....enter y or n")
 
     print('   ')        #spacing
 
+def print_help():
+    ''' print the help from the parser '''
+    cfg.parser.print_help()
+    return True
 
 
-class ConfigOptions(object):
-    '''
-    /**
-     *
-     * File Description: This class provides a single access metthod to
-     *    acquire parms.  A call to the method returns an array of
-     *    runparms.  If the run parm file does not exist, a file is
-     *    created from the defaults in the config file.  If the file
-     *    is found, then the options are set from the parm file.
-     *
-     * If a version is set, the cfg version is compared to parm version and
-     *    the file is rewritten if the version changes.
-     *
-     *
-     * @author          The Pineridge Group, LLC
-     * @link            http://www.tpginc.net/
-     * @lastmodified    2012-06-15
-     * @copyright       2012 The Pineridge Group, LLC
-     *     *
-     * @license     http://opensource.org/licenses/gpl-license.php GNU Public License
-     */
-
-
-    /**
-     * Usage
-     * <code>
-     * co = util.ConfigOptions()
-     * sect_array = co.get_sectparms('RunParms')
-     * </code>
-     *
-     *
-
-     */
-    '''
-
-    #class variables
-    _cp=''                                  #config parser object
-    cwd=''                                  #curr working dir
-    configfl='config.ini'                   #config file
-
-    def __init__(self,_cfgfl=''):
-        ''' Constructor - load file or create if not found
-        '''
-
-        if _cfgfl:
-            self.configfl=_cfgfl
-
-        # create config parser object
-        self._cp =configparser.SafeConfigParser()
-        #path to current working directory
-        self.cwd = cfg.path
-
-        if os.path.exists(self.cwd+self.configfl):
-            self._cp.read(self.cwd+self.configfl)
-        else:
-            with open(self.cwd+self.configfl,'w') as cfl:
-                cfl.write("# config file - values here will override cfg module values \n")
-                cfl.write("[RunParms] \n")
-                cfl.write("version={} \n".format(cfg.version))
-
-
-            cfl.close()
-            # read the model
-            self._cp.read(self.cwd+self.configfl)
-
-
-    def __del__(self):
-        pass
-
-    def verify_parmfile(self,_path,_flnm):
-        ''' Verify parm file exists.
-        '''
-        if not os.path.exists(_path+_flnm):
-            print('***')
-            print('  sys parm file "{0}" not found on path {1}'.format(_flnm, _path))
-            print('  path:',_path+_flnm)
-            print('***')
-            exit(1)
-
-    def get_sectparms(self,sect='RunParms'):
-        '''
-        * get_sectparms - return an array of the section options from the
-        * run options ini file
-        *
-        * @returns array of section options
-
-        '''
-
-        # return dict
-        try:
-            sectparms = dict(self._cp.items(sect))
-        except:
-            print('***')
-            print('  run parm section "{0}" not found '.format(sect))
-            print('***')
-            exit(1)
-
-
-        if 'version' not in sectparms or sectparms['version'] != cfg.version:
-            print('***')
-            print('  The version of config.ini is not the same as the config.py module')
-            print('  Save any changes made in the config.ini and then delete the file')
-            print('  this will force rebuilding of the file in the correct format')
-            print('  Re-apply any custom changes')
-            print('***')
-            exit(1)
-
-        return sectparms

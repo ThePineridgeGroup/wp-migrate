@@ -18,6 +18,7 @@ from __future__ import division, print_function
 import sys, os, argparse, datetime, time, re
 import phpserialize
 import six
+from six.moves import input
 from collections import OrderedDict
 from decimal import *
 import importlib
@@ -33,7 +34,7 @@ class WPMigrate(object):
     '''
 
     #variables
-
+    skip_atexit = False
 
     def __init__(self):
         ''' init class and define cursors '''
@@ -46,80 +47,176 @@ class WPMigrate(object):
             set cfg values
         '''
         global parms
-        parser=util.get_parser()
-        cfg.parms = parser.parse_args()
+        cfg.parser=util.get_parser()
+        cfg.parms = cfg.parser.parse_args()
 
+        self.get_path()
+        cfg.inflnm = 'tpg_wp.sql'
+        cfg.outflnm = 'tpg_wp-new.sql'
 
-        util.confirm(cfg.parms,parser)
+        self.get_tbl_prefix()
+        self.get_domains()
 
-        #set rest of config values
-        util.config_setup()
+        util.confirm(cfg.parms,cfg.parser)
+
 
     def get_path(self,):
-        ''' prompt for parms '''
+        ''' prompt for path and set file names '''
+        print('The path can be either relative path or an absolute path.  The relative path is relative to the data/ directory in this application.')
+        print('For example:  xYz equates to data/data/xYz')
+        print('              /user/home/username/xyz/ is the absolute path')
         while (True):
-            usr_resp= input("  Is this correct? (y/n)  ")
-            if (usr_resp =='y') :
+            _path = input('Enter the path:  ')
+            if _path[:-1] not in ['/','\\']:
+                _path += '/'
+            if os.path.exists(cfg.rel_path+_path):
+                _path = cfg.rel_path+_path
+                cfg.path = _path
                 break
-            elif (usr_resp == 'n'):
-                parser.print_help()
-                exit()
-            else :
-                print("invalid entry....enter y or n")
+            elif os.path.exists(_path):
+                cfg.path = _path
+                break
+            else:
+                while (True):
+                    usr_resp= input("  The path was invalid. Retry? (y/n)  ")
+                    if (usr_resp =='y') :
+                        break
+                    elif (usr_resp in ['n','x']):
+                        self.skip_atexit = util.print_help()
+                        exit()
+                    else :
+                        print("invalid entry....enter y or n")
+
+        _flist=util.get_filelist(cfg.path)
+        if not _flist:
+            print('\n**No sql file found at the default directory {}  \nRerun and enter a correct path\n**Aborting Run**'.format(cfg.path))
+            self.skip_atexit = True
+            exit()
+        else:
+            cfg.inflnm = _flist[0]
+            _nfnm = cfg.inflnm.split('.sql')
+            cfg.outflnm = _nfnm[0]+cfg.new_fl_sfx+'.sql'
 
         print('   ')        #spacing
 
     def get_tbl_prefix(self,):
         ''' prompt for parms '''
+        print('Enter the old and new table prefix:')
+        print('(press enter for no prefix)')
         while (True):
-            usr_resp= input("  Is this correct? (y/n)  ")
+            _op = input('Enter the old table prefix:  ')
+            _np = input('Enter the new table prefix:  ')
+            print('Old Prefix: {}  ==> New Prefix: {} '.format(_op,_np))
+            usr_resp= input("  Is this correct? (y/n/x to exit)   ")
             if (usr_resp =='y') :
+                cfg.old_tbl_prefix = _op
+                cfg.new_tbl_prefix = _np
                 break
-            elif (usr_resp == 'n'):
-                parser.print_help()
+            elif (usr_resp == 'x'):
+                self.skip_atexit = util.print_help()
                 exit()
-            else :
-                print("invalid entry....enter y or n")
+
 
         print('   ')        #spacing
 
     def get_domains(self,):
         ''' prompt for old and new domains '''
+        print('Enter the old and new domain names: www.domain.com')
         while (True):
-            usr_resp= input("  Is this correct? (y/n)  ")
+            _od = input('Enter the old domain:  ')
+            _nd = input('Enter the new domain:  ')
+            print('Old Domain: {}  ==> New Domain: {} '.format(_od,_nd))
+            usr_resp= input("  Is this correct? (y/n/x to exit)   ")
             if (usr_resp =='y') :
+                cfg.old_domain = _od
+                cfg.new_domain = _nd
                 break
-            elif (usr_resp == 'n'):
-                parser.print_help()
+            elif (usr_resp == 'x'):
+                self.skip_atexit = util.print_help()
                 exit()
-            else :
-                print("invalid entry....enter y or n")
 
         print('   ')        #spacing
 
-    def app_functions(self):
-        ''' function description '''
+    def process_sql_file(self,):
+        ''' read the sql file, make changes, write new sql file '''
 
-        print('Message to log progress. function complete \n')
+        self.outfl=flio.ProcOutput(cfg.path,cfg.outflnm)
+
+        with open(cfg.path+cfg.inflnm,'r') as self.infl:
+            for _rec in self.infl:
+                #print(_rec)
+                if re.search(cfg.old_domain,_rec) or re.search(cfg.old_tbl_prefix,_rec):
+                    #print(_rec)
+                    _rec = self.edit_rec(_rec)
+
+                self.outfl.write_ofl(_rec,newline=False)
+
+        self.outfl.close_ofl()
+
+        print('Processing of sql file complete \n')
+
+
+    def edit_rec(self,_r):
+        ''' scan and edit each record if appropriate'''
+
+        serialized=False
+        import pdb; pdb.set_trace()
+
+        #save the end char & split the rec into a list
+        _end = _r[:-1]
+        _rlist = _r.split(',')
+
+        for _s in _rlist:
+            #try unserialize, else just use it
+            try:
+                _s = _s.replace("\'","")
+                _s = phpserialize.unserialize(_s,array_hook=OrderedDict)
+                serialized=True
+            except:
+                pass
+
+            #search for a string that needs changing
+            if re.search(cfg.old_domain,_s):
+                _s = _s.replace(cfg.old_domain,cfg.new_domain)
+
+            if re.search(cfg.old_tbl_prefix,_s):
+                _s = _s.replace(cfg.old_tbl_prefix,cfg.new_tbl_prefix)
+
+            if serialized:
+                _s = phpserialize.serialize(_s)
+
+        #put the pieces back together
+        _t = ','.join(_rlist)
+        if _end == ',' and _t[-1] != ',':
+            _t += ','
+        return _t
+
+    def serialize_rec(self,_r):
+        ''' unserialize the rec, change elements, serialize'''
+
+        _s = phpserialize.unserialize(_r,array_hook=OrderedDict)
+
+        #loop thru _s and change text
+        # code to come
+
+        _r = phpserialize.serialize(_s)
+
+        return s
 
 
     def exit_rtn(self,):
         ''' clean up at exit'''
-        print('(wpm.exit) Processing of wpm files complete')
+        # if help printed, skip this
+        if self.skip_atexit:
+            return
+        #print('(wpm.exit) Processing of wpm files complete')
 
 
     def main(self,):
         ''' init cfg, load db, cleanup, write out csv, graphs '''
         #setup
         self.config_parser_values()
-        util.config_runparms()
-        self.db_setup()
-
-        #read files and update db
-        self.build_table()
-
-        #get start/stop time
-        util.calc_start_stop()
+        self.process_sql_file()
 
 
 

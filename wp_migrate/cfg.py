@@ -17,7 +17,11 @@ from decimal import *
 
 version='1.1'      # version to monitor changes to the config.ini file layout
 parms=''           # parms object from parser
+rel_path='data/data/'
+new_fl_sfx='-new'
 path=''            # path to data file directory w/ trailing '/'
+inflnm=''
+outflnm=''
 
 #from wp-config.php  $table_prefix
 old_tbl_prefix=''
