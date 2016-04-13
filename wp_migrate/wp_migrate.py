@@ -171,27 +171,34 @@ class WPMigrate(object):
             serialized=False
             try:
                 _s = phpserialize.unserialize(_s,array_hook=OrderedDict)
-                serialized=True
-            except:
-                pass
-
-            #search for a string that needs changing
-            if re.search(cfg.old_domain,_s):
-                print('before: {}'.format(_s))
-                _s = _s.replace(cfg.old_domain,cfg.new_domain)
-                print(' after: {}'.format(_s))
-
-            if re.search(cfg.old_tbl_prefix,_s):
-                _s = _s.replace(cfg.old_tbl_prefix,cfg.new_tbl_prefix)
-
-            if serialized:
+                #serialized=True
+                for _se in _s:
+                    _se = self.replace_strings(_se)
                 _s = phpserialize.serialize(_s)
+            except:
+                _s = self.replace_strings(_s)
+
+
 
         #put the pieces back together
         _t = _sep.join(_rlist)
         if _end == ',' and _t[-1] != ',':
             _t += ','
         return _t
+
+    def replace_strings(self,_s):
+        ''' replace the strings'''
+         #search for a string that needs changing
+        if re.search(cfg.old_domain,_s):
+            print('before: {}'.format(_s))
+            _s = _s.replace(cfg.old_domain,cfg.new_domain)
+            print(' after: {}'.format(_s))
+
+        if re.search(cfg.old_tbl_prefix,_s):
+            _s = _s.replace(cfg.old_tbl_prefix,cfg.new_tbl_prefix)
+
+        return _s
+
 
     def serialize_rec(self,_r):
         ''' unserialize the rec, change elements, serialize'''
