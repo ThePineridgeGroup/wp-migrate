@@ -159,17 +159,17 @@ class WPMigrate(object):
     def edit_rec(self,_r):
         ''' scan and edit each record if appropriate'''
 
-        serialized=False
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
+        _sep = "', '"
 
         #save the end char & split the rec into a list
         _end = _r[:-1]
-        _rlist = _r.split(',')
+        _rlist = _r.split(_sep)
 
         for _s in _rlist:
             #try unserialize, else just use it
+            serialized=False
             try:
-                _s = _s.replace("\'","")
                 _s = phpserialize.unserialize(_s,array_hook=OrderedDict)
                 serialized=True
             except:
@@ -177,7 +177,9 @@ class WPMigrate(object):
 
             #search for a string that needs changing
             if re.search(cfg.old_domain,_s):
+                print('before: {}'.format(_s))
                 _s = _s.replace(cfg.old_domain,cfg.new_domain)
+                print(' after: {}'.format(_s))
 
             if re.search(cfg.old_tbl_prefix,_s):
                 _s = _s.replace(cfg.old_tbl_prefix,cfg.new_tbl_prefix)
@@ -186,7 +188,7 @@ class WPMigrate(object):
                 _s = phpserialize.serialize(_s)
 
         #put the pieces back together
-        _t = ','.join(_rlist)
+        _t = _sep.join(_rlist)
         if _end == ',' and _t[-1] != ',':
             _t += ','
         return _t

@@ -26,7 +26,7 @@ class TestProcInput():
         self.filename = cfg.inflnm
         print('(io.setup) ',cfg.path, cfg.inflnm)
         self.x=flio.ProcInput(cfg.path,self.filename)
-        assert_true(isinstance(self.x.infl,object))
+        assert isinstance(self.x.infl,object) == True
         self.rec_cnt=0
 
     def test_in_interface(self):

@@ -20,7 +20,7 @@ import wp_migrate.wp_migrate as wp_migrate
 
 
 def setup():
-    '''(wpm.setup) setup for nt testing'''
+    '''(wpm.setup) setup for  testing'''
     print("SETUP!")
     global wpm
     wpm=wp_migrate.WPMigrate()
@@ -28,7 +28,7 @@ def setup():
 
 
 def teardown():
-    '''(wpm.teardown) tear down for nt testing'''
+    '''(wpm.teardown) tear down for  testing'''
     print("TEAR DOWN!")
 
 
@@ -36,6 +36,8 @@ class TestWPM():
 
     def setup(self,):
         '''(wpm.setup) setup for each test'''
+        global wpm
+        wpm=wp_migrate.WPMigrate()
 
         pass
 
@@ -59,6 +61,28 @@ class TestWPM():
         print('(test_wpm.process)')
         wpm.process_sql_file()
         assert_equal(False,True)
+
+    def test_edit_rec(self,):
+        '''(wpm.test_process_sql) test the sql processing '''
+        print('(test_wpm.edit_rec)')
+        print('test domain')
+        _trec1 = wpm.edit_rec(test_rec1)
+        assert_equal(test_rec1,_trec1)
+
+        print('test domain without serialization')
+        _trec3 = wpm.edit_rec(test_rec3)
+        assert_equal(test_rec3,_trec3)
+
+        print('test prefix')
+        _trec2 = wpm.edit_rec(test_rec2)
+        assert_equal(test_rec2,_trec2)
+
+        print('test full path')
+        _trec3 = wpm.edit_rec(test_rec3)
+        assert_equal(test_rec3,_trec3)
+
+        assert_equal(False,True)
+
 
     @unittest.skip('')
     def test_sample_skip(self,):
