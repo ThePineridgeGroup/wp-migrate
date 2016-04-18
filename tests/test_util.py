@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import sys, os, datetime, time, re
-from nose2.tools import *
+#import pytest
 import wp_migrate.cfg as cfg
 import wp_migrate.util as util
 import wp_migrate.flio as flio
@@ -23,7 +23,7 @@ class TestUtil():
         fl=os.listdir(cfg.path)
         print('fl:',fl)
         print('cfg:',cfg.inflnm)
-        assert_equal(cfg.inflnm, fl[0])
+        assert cfg.outflnm == fl[0]
 
 
 
