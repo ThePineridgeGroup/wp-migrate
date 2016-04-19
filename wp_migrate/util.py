@@ -125,6 +125,9 @@ def confirm(parms,parser):
     print('              Old Domain: ',cfg.old_domain)
     print('              New Domain: ',cfg.new_domain)
     print('')
+    print('')
+    print('           Old Full Path: ',cfg.old_full_path)
+    print('           New FUll Path: ',cfg.new_full_path)
     print('=====================================================\n')
 
     while (True):

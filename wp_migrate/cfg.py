@@ -18,7 +18,7 @@ from decimal import *
 version='1.1'      # version to monitor changes to the config.ini file layout
 parms=''           # parms object from parser
 rel_path='data/data/'
-new_fl_sfx='-new'
+new_fl_sfx='new'
 path=''            # path to data file directory w/ trailing '/'
 inflnm=''
 outflnm=''
@@ -28,6 +28,8 @@ old_tbl_prefix=''
 new_tbl_prefix=''
 old_domain=''
 new_domain=''
+old_full_path=''
+new_full_path=''
 
 #errors
 err=False
