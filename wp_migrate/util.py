@@ -24,6 +24,7 @@ from decimal import *
 import cfg, flio
 
 
+
 def fmt_time(_t):
     '''format the time to consistant Decimal '''
     _d = Decimal(_t).quantize(cfg.dquant)
@@ -83,6 +84,17 @@ def get_parser():
         text.  The application will scan for the domain name and
         determine if the string is in standard text or serialized text.
 
+        URL:
+
+        If the site is installed in a subdirectory (ie, not in the root dir
+        of the domain, then the URL will be different from the Domain.  If
+        they are the same, the URL can be omitted, ie just press return.
+
+        Full Path:
+
+        Some of the internal paths require the full path to the site.  If a
+        Linux environment, the path is in the form of /home/<userid>/<site-domain>
+
         Other comments
 
         This application should run under Python 2.7 or Python 3.3.
@@ -125,6 +137,8 @@ def confirm(parms,parser):
     print('              Old Domain: ',cfg.old_domain)
     print('              New Domain: ',cfg.new_domain)
     print('')
+    print('                 Old URL: ',cfg.old_url)
+    print('                 New URL: ',cfg.new_url)
     print('')
     print('           Old Full Path: ',cfg.old_full_path)
     print('           New FUll Path: ',cfg.new_full_path)
@@ -147,4 +161,132 @@ def print_help():
     cfg.parser.print_help()
     return True
 
+def set_cfg_parms():
+    ''' prompt for run parms '''
+
+    get_sql_path()
+
+    get_tbl_prefix()
+    get_domains()
+    get_urls()
+    get_full_path()
+
+    confirm(cfg.parms,cfg.parser)
+
+def get_sql_path():
+    ''' prompt for path and set file names '''
+    print('\nThe sql path can be either relative path or an absolute path.  The relative path is relative to the data/ directory in this application.')
+    print('For example:  xYz equates to data/data/xYz')
+    print('              /user/home/username/xyz/ is the absolute sql path')
+    while (True):
+        _path = input('Enter the sql path:  ')
+        if _path[:-1] not in ['/','\\']:
+            _path += '/'
+        if os.path.exists(cfg.rel_path+_path):
+            _path = cfg.rel_path+_path
+            cfg.path = _path
+            break
+        elif os.path.exists(_path):
+            cfg.path = _path
+            break
+        else:
+            while (True):
+                usr_resp= input("  The path was invalid. Retry? (y/n)  ")
+                if (usr_resp =='y') :
+                    break
+                elif (usr_resp in ['n','x']):
+                    cfg.skip_atexit = util.print_help()
+                    exit()
+                else :
+                    print("invalid entry....enter y or n")
+
+    _flist=get_filelist(cfg.path)
+    if not _flist:
+        print('\n**No sql file found at the default directory {}  \nRerun and enter a correct path\n**Aborting Run**'.format(cfg.path))
+        cfg.skip_atexit = True
+        exit()
+    else:
+        cfg.inflnm = _flist[0]
+        _nfnm = cfg.inflnm.split('.sql')
+        cfg.outflnm = _nfnm[0]+cfg.new_fl_sfx+'.sql'
+
+    print('   ')        #spacing
+
+def get_tbl_prefix():
+    ''' prompt for parms '''
+    print('Enter the old and new table prefix:')
+    print('(press enter for no prefix)')
+    while (True):
+        _op = input('Enter the old table prefix:  ')
+        _np = input('Enter the new table prefix:  ')
+        print('Changing Old Prefix: {}  ==> New Prefix: {} '.format(_op,_np))
+        usr_resp= input("  Is this correct? (y/n/x to exit)   ")
+        if (usr_resp =='y') :
+            cfg.old_tbl_prefix = _op
+            cfg.new_tbl_prefix = _np
+            break
+        elif (usr_resp == 'x'):
+            cfg.skip_atexit = util.print_help()
+            exit()
+
+
+    print('   ')        #spacing
+
+def get_domains():
+    ''' prompt for old and new domains '''
+    print('Enter the old and new domain names: www.domain.com')
+    while (True):
+        _od = input('Enter the old domain:  ')
+        _nd = input('Enter the new domain:  ')
+        print('Changing Old Domain: {}  ==> New Domain: {} '.format(_od,_nd))
+        usr_resp= input("  Is this correct? (y/n/x to exit)   ")
+        if (usr_resp =='y') :
+            cfg.old_domain = _od
+            cfg.new_domain = _nd
+            break
+        elif (usr_resp == 'x'):
+            cfg.skip_atexit = util.print_help()
+            exit()
+
+    print('   ')        #spacing
+
+def get_urls():
+    ''' prompt for old and new url '''
+    print('Enter the old and new url: www.domain.com/directory')
+    print('  This will differ from domain if the site is installed')
+    print('  in a subdirectory')
+    while (True):
+        _od = input('Enter the old url:  ')
+        _nd = input('Enter the new url:  ')
+        print('Changing Old URL: {}  ==> New URL: {} '.format(_od,_nd))
+        usr_resp= input("  Is this correct? (y/n/x to exit)   ")
+        if (usr_resp =='y') :
+            cfg.old_url = _od
+            cfg.new_url = _nd
+            break
+        elif (usr_resp == 'x'):
+            cfg.skip_atexit = util.print_help()
+            exit()
+
+    print('   ')        #spacing
+
+def get_full_path():
+    ''' prompt for full path '''
+    print('Enter the old and new full path:   /home/userid/site/')
+    print('(press enter to skip)')
+    while (True):
+        _op = input('Enter the old full path:  ')
+        _np = input('Enter the new full path:  ')
+
+        print('Changing Old Path: {}  ==> New Path: {} '.format(_op,_np))
+        usr_resp= input("  Is this correct? (y/n/x to exit)   ")
+        if (usr_resp =='y') :
+            cfg.old_full_path = _op
+            cfg.new_full_path = _np
+            break
+        elif (usr_resp == 'x'):
+            cfg.skip_atexit = util.print_help()
+            exit()
+
+    print('   ')        #spacing
 

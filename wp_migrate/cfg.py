@@ -26,11 +26,19 @@ outflnm=''
 #from wp-config.php  $table_prefix
 old_tbl_prefix=''
 new_tbl_prefix=''
+#domain is www.domain.xxx
 old_domain=''
 new_domain=''
+#url is the domain plus install subdirectory www.domain.xxx/directory
+old_url=''
+new_url=''
+#full_path is /home/userid/site/directory
 old_full_path=''
 new_full_path=''
 
 #errors
 err=False
 err_msgs=[]
+
+#variables
+skip_atexit = False

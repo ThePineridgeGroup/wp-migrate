@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  wp-migrate.py
+#  wp_migrate.py
 #
 #   This is the main controller for the wp mirgration application
 #   which will change the domain name in the sql files.
@@ -32,7 +32,7 @@ class WPMigrate(object):
     '''
 
     #variables
-    skip_atexit = False
+    #skip_atexit = False
     rlist=[]
     ser_err_cnt=0
 
@@ -50,112 +50,8 @@ class WPMigrate(object):
         cfg.parser=util.get_parser()
         cfg.parms = cfg.parser.parse_args()
 
-        self.get_path()
+        util.set_cfg_parms()
 
-        self.get_tbl_prefix()
-        self.get_domains()
-        self.get_full_path()
-
-        util.confirm(cfg.parms,cfg.parser)
-
-
-    def get_path(self,):
-        ''' prompt for path and set file names '''
-        print('The path can be either relative path or an absolute path.  The relative path is relative to the data/ directory in this application.')
-        print('For example:  xYz equates to data/data/xYz')
-        print('              /user/home/username/xyz/ is the absolute path')
-        while (True):
-            _path = input('Enter the path:  ')
-            if _path[:-1] not in ['/','\\']:
-                _path += '/'
-            if os.path.exists(cfg.rel_path+_path):
-                _path = cfg.rel_path+_path
-                cfg.path = _path
-                break
-            elif os.path.exists(_path):
-                cfg.path = _path
-                break
-            else:
-                while (True):
-                    usr_resp= input("  The path was invalid. Retry? (y/n)  ")
-                    if (usr_resp =='y') :
-                        break
-                    elif (usr_resp in ['n','x']):
-                        self.skip_atexit = util.print_help()
-                        exit()
-                    else :
-                        print("invalid entry....enter y or n")
-
-        _flist=util.get_filelist(cfg.path)
-        if not _flist:
-            print('\n**No sql file found at the default directory {}  \nRerun and enter a correct path\n**Aborting Run**'.format(cfg.path))
-            self.skip_atexit = True
-            exit()
-        else:
-            cfg.inflnm = _flist[0]
-            _nfnm = cfg.inflnm.split('.sql')
-            cfg.outflnm = _nfnm[0]+cfg.new_fl_sfx+'.sql'
-
-        print('   ')        #spacing
-
-    def get_tbl_prefix(self,):
-        ''' prompt for parms '''
-        print('Enter the old and new table prefix:')
-        print('(press enter for no prefix)')
-        while (True):
-            _op = input('Enter the old table prefix:  ')
-            _np = input('Enter the new table prefix:  ')
-            print('Old Prefix: {}  ==> New Prefix: {} '.format(_op,_np))
-            usr_resp= input("  Is this correct? (y/n/x to exit)   ")
-            if (usr_resp =='y') :
-                cfg.old_tbl_prefix = _op
-                cfg.new_tbl_prefix = _np
-                break
-            elif (usr_resp == 'x'):
-                self.skip_atexit = util.print_help()
-                exit()
-
-
-        print('   ')        #spacing
-
-    def get_domains(self,):
-        ''' prompt for old and new domains '''
-        print('Enter the old and new domain names: www.domain.com')
-        while (True):
-            _od = input('Enter the old domain:  ')
-            _nd = input('Enter the new domain:  ')
-            print('Old Domain: {}  ==> New Domain: {} '.format(_od,_nd))
-            usr_resp= input("  Is this correct? (y/n/x to exit)   ")
-            if (usr_resp =='y') :
-                cfg.old_domain = _od
-                cfg.new_domain = _nd
-                break
-            elif (usr_resp == 'x'):
-                self.skip_atexit = util.print_help()
-                exit()
-
-        print('   ')        #spacing
-
-    def get_full_path(self,):
-        ''' prompt for full path '''
-        print('Enter the old and new full path:   /home/userid/site/')
-        print('(press enter to skip)')
-        while (True):
-            _op = input('Enter the old full path:  ')
-            _np = input('Enter the new full path:  ')
-
-            print('Old Path: {}  ==> New Path: {} '.format(_op,_np))
-            usr_resp= input("  Is this correct? (y/n/x to exit)   ")
-            if (usr_resp =='y') :
-                cfg.old_full_path = _op
-                cfg.new_full_path = _np
-                break
-            elif (usr_resp == 'x'):
-                self.skip_atexit = util.print_help()
-                exit()
-
-
-        print('   ')        #spacing
 
     def process_sql_file(self,):
         ''' read the sql file, make changes, write new sql file '''
@@ -164,15 +60,10 @@ class WPMigrate(object):
 
         with open(cfg.path+cfg.inflnm,'r') as self.infl:
             for _rec in self.infl:
-                #print(_rec)
                 if self.scan_for_old_strings(_rec):
-                    #print('\nscan sucess:'_rec)
                     #_rec = self.pre_proc_rec(_rec)
-                    #print(_rec)
                     _rec = self.edit_rec(_rec)
-                    #print(_rec)
                     #_rec = self.pst_proc_rec(_rec)
-                   # print(_rec)
 
                 self.outfl.write_ofl(_rec,newline=False)
 
@@ -183,23 +74,23 @@ class WPMigrate(object):
 
     def pre_proc_rec(self,_r):
         ''' edit each record so parsing works correctly '''
-        _r = _r.replace("""\\', ""","~#~#")
         return _r
 
     def pst_proc_rec(self,_r):
         ''' reverse changes applied in pre processing '''
-        _r = _r.replace("~#~#","""\\', """)
         return _r
 
     def edit_rec(self,_r):
         ''' scan and edit each record if appropriate'''
 
         #import pdb; pdb.set_trace()
-        _sep = "', "
+        _sep = "\\', "
 
         #save the end char & split the rec into a list
         _end = _r[:-1]
-        #self._rlist = _r.split(_sep)
+
+        #re.split parses the sql correctly, where str.split does
+        # not handle escaped ' correctly
         self._rlist = re.split(r"\\\'\, ",_r)
 
         for i,_s in enumerate(self._rlist):
@@ -253,14 +144,26 @@ class WPMigrate(object):
         if not cfg.old_tbl_prefix in ['',None]:
             if re.search(cfg.old_tbl_prefix,_txt):
                 _r = True
+        if not cfg.old_url in ['',None]:
+            if re.search(cfg.old_url,_txt):
+                _r = True
+        return _r
         if not cfg.old_full_path in ['',None]:
             if re.search(cfg.old_full_path,_txt):
                 _r = True
         return _r
 
     def replace_strings(self,_s):
-        ''' replace the strings'''
+        ''' replace the strings
+            ***NOTE:
+            the URL must process before the Domain as the Domain is a
+            subset of the url.  If the domain processes first, then the
+            url will not match.
+        '''
         #search for a string that needs changing
+        if not cfg.old_url in ['',None]:
+            if re.search(cfg.old_url,_s):
+                _s = _s.replace(cfg.old_url,cfg.new_url)
 
         if not cfg.old_domain in ['',None]:
             if re.search(cfg.old_domain,_s):
@@ -280,7 +183,7 @@ class WPMigrate(object):
     def exit_rtn(self,):
         ''' clean up at exit'''
         # if help printed, skip this
-        if self.skip_atexit:
+        if cfg.skip_atexit:
             return
         print('(wpm.exit) Processing of wpm files complete')
         print('** {} serializations failed '.format(self.ser_err_cnt))
