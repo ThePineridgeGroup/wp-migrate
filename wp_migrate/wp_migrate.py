@@ -20,8 +20,6 @@ import phpserialize
 import six
 from six.moves import input
 from collections import OrderedDict
-from decimal import *
-import importlib
 import atexit
 
 # neutron-tunneling modules
@@ -168,8 +166,13 @@ class WPMigrate(object):
             for _rec in self.infl:
                 #print(_rec)
                 if self.scan_for_old_strings(_rec):
+                    #print('\nscan sucess:'_rec)
+                    #_rec = self.pre_proc_rec(_rec)
                     #print(_rec)
                     _rec = self.edit_rec(_rec)
+                    #print(_rec)
+                    #_rec = self.pst_proc_rec(_rec)
+                   # print(_rec)
 
                 self.outfl.write_ofl(_rec,newline=False)
 
@@ -178,29 +181,48 @@ class WPMigrate(object):
         print('Processing of sql file complete \n')
 
 
+    def pre_proc_rec(self,_r):
+        ''' edit each record so parsing works correctly '''
+        _r = _r.replace("""\\', ""","~#~#")
+        return _r
+
+    def pst_proc_rec(self,_r):
+        ''' reverse changes applied in pre processing '''
+        _r = _r.replace("~#~#","""\\', """)
+        return _r
+
     def edit_rec(self,_r):
         ''' scan and edit each record if appropriate'''
 
         #import pdb; pdb.set_trace()
-        _sep = "', '"
+        _sep = "', "
 
         #save the end char & split the rec into a list
         _end = _r[:-1]
-        self._rlist = _r.split(_sep)
-
+        #self._rlist = _r.split(_sep)
+        self._rlist = re.split(r"\\\'\, ",_r)
 
         for i,_s in enumerate(self._rlist):
             #try unserialize, else just use it
             if self.scan_for_old_strings(_s):
                 try:
+                    add_quotes = False
+                    if _s[1:3] == 'a:':
+                        _s = _s.strip("'")
+                        add_quotes = True
                     _s = phpserialize.unserialize(_s,array_hook=OrderedDict)
-                    #serialized=True
                     _s = self.iterate_data(_s)
-                    self._rlist[i] = phpserialize.serialize(_s)
-                except:
+                    _ss = phpserialize.serialize(_s)
+                    #add back single quotes
+                    if add_quotes:
+                        self._rlist[i] = "'{}'".format(_ss)
+                        add_quotes = False
+                except Exception as e:
                     self._rlist[i] = self.replace_strings(_s)
                     if _s[0:2] == 'a:':
                         print('\n**serialization failed: {}\n{}'.format(self._rlist[0],self._rlist[i]))
+                        print('**',e)
+                        #print('***',a)
                         self.ser_err_cnt += 1
 
         #put the pieces back together
