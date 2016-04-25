@@ -3,6 +3,9 @@
 WP Migrate is a tool to process the WordPress sql and change
 the table name prefix, if applicable, and domain name.
 
+The guid for posts will be changed if it is the same as the domain.  This utility
+should not be used for sites where resetting the reader feed will cause problems.
+
 Tests are provided using pytest
 
 This application has been designed to run under Python 2 and 3, but has
