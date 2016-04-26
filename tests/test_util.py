@@ -13,6 +13,7 @@ def teardown():
     print("TEAR DOWN!")
 
 class TestUtil():
+        @pytest.fixture(autouse=True)
 
     def setup(self,):
         '''(util.setup) setup for each test'''

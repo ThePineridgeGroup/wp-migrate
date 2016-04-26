@@ -8,14 +8,7 @@ import wp_migrate.util as util
 import wp_migrate.flio as flio
 import wp_migrate.wp_migrate as wp_migrate
 
-import __init__ as temp
 
-
-def setup():
-    print("SETUP!")
-
-def teardown():
-    print("TEAR DOWN!")
 
 class TestProcInput():
     '''(flio.ProcInput) test class interface '''
