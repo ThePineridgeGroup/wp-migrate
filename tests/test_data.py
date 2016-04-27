@@ -31,6 +31,13 @@ INSERT INTO `wp_o205dv_options` (`option_id`, `option_name`, `option_value`, `au
 
 test_rec1='''(44, 'recently_edited', 'a:5:{i:0;s:67:"/home/tpginc/tpginc.net/blog/wp-content/themes/tpg-virtue/style.css";i:2;s:79:"/home/tpginc/tpginc.net/blog/wp-content/plugins/tpg-get-posts/tpg-get-posts.php";i:3;s:75:"/home/tpginc/tpginc.net/blog/wp-content/plugins/wp-super-cache/wp-cache.php";i:4;s:65:"/home/tpginc/tpginc.net/blog/wp-content/themes/tpg-2010/style.css";i:5;s:95:"/home/tpginc/tpginc.net/blog/wp-content/plugins/really-simple-captcha/really-simple-captcha.php";}', 'no'),'''
 
+test_rec1_b='''(44, 'recently_edited', 'a:5:{i:0;s:67:"/home/tpginc/testdomain.com/blog/wp-content/themes/tpg-virtue/style.css";i:2;s:79:"/home/tpginc/testdomain.com/blog/wp-content/plugins/tpg-get-posts/tpg-get-posts.php";i:3;s:75:"/home/tpginc/testdomain.com/blog/wp-content/plugins/wp-super-cache/wp-cache.php";i:4;s:65:"/home/tpginc/testdomain.com/blog/wp-content/themes/tpg-2010/style.css";i:5;s:95:"/home/tpginc/testdomain.com/blog/wp-content/plugins/really-simple-captcha/really-simple-captcha.php";}', 'no'),'''
+
+
 test_rec2='''(117, 'dashboard_widget_options', 'a:4:{s:25:"dashboard_recent_comments";a:1:{s:5:"items";i:5;}s:24:"dashboard_incoming_links";a:5:{s:4:"home";s:21:"http://www.tpginc.net";s:4:"link";s:97:"http://blogsearch.google.com/blogsearch?scoring=d&partner=wordpress&q=link:http://www.tpginc.net/";s:3:"url";s:32:"http://www.tpginc.net/blog/feed/";s:5:"i'''
 
 test_rec3='''(1, 'siteurl', 'http://www.tpginc.net/blog', 'yes'),'''
+
+#s:50:"\'Lucida Sans Unicode\', \'Lucida Grande\', sans-serif";s:12
+test_rec4_a = """(157636, 'virtue_premium', 'a:3:{s:11:"font-family";s:50:"\'Lucida Sans Unicode\', \'Lucida Grande\', sans-serif";s:12:"font-options";}', 'yes');"""
+test_rec4_b = """(157636, 'virtue_premium', 'a:3:{s:11:"font-family";s:50:"\'Lucida Sans Unicode~#~#\'Lucida Grande~#~#sans-serif";s:12:"font-options";}', 'yes');"""

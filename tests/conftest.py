@@ -39,7 +39,11 @@ class IniSetup():
         cfg.old_tbl_prefix='wp_o205dv_'
         cfg.new_tbl_prefix='xx_'
         cfg.old_domain='www.tpginc.net'
-        cfg.new_domain='www.testdomain.org'
+        cfg.new_domain='www.testdomain.com'
+        cfg.old_url='www.tpginc.net/blog/'
+        cfg.new_url='www.testdomain.com/blog/'
+        cfg.old_full_path='/home/tpginc/tpginc.net/blog/'
+        cfg.new_full_path='/home/tpginc/testdomain.com/blog/'
         cfg.inflnm='test_sql.sql'
         cfg.outflnm='test_sql-new.sql'
 
@@ -49,7 +53,7 @@ class IniSetup():
 
 
         #create the test data object
-        cfg.tdata = p_obj(trec1=td.test_rec1,trec2=td.test_rec2,trec3=td.test_rec3,tsql=td.test_sql)
+        cfg.tdata = p_obj(trec1=td.test_rec1,trec1_b=td.test_rec1_b,trec2=td.test_rec2,trec3=td.test_rec3,tsql=td.test_sql,trec4_a=td.test_rec4_a,trec4_b=td.test_rec4_b)
 
         # generate test files in folder cfg.path
 
@@ -65,7 +69,7 @@ class IniSetup():
         self.build_test_data()
 
 
-    @unittest.skip('')
+    #@unittest.skip('')
     def delete_test_files(self,):
         '''(init.delete_test_files) delete test files and directory'''
 
@@ -78,14 +82,14 @@ class IniSetup():
                 os.rmdir(cfg.path+f)
         os.rmdir(cfg.path)
 
-    @unittest.skip('')
+    #@unittest.skip('')
     def build_test_data(self,):
         '''(init.build_test_data) Build the test data from test_sql.
 
         input is file object and filename
         '''
 
-         _sql_list= cfg.tdata.tsql.split(cfg.newline)
+        _sql_list= cfg.tdata.tsql.split(cfg.newline)
         #build test data file
         fl=open(cfg.path+cfg.inflnm,'w')
 

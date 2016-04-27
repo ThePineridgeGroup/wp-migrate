@@ -83,7 +83,8 @@ class WPMigrate(object):
     def edit_rec(self,_r):
         ''' scan and edit each record if appropriate'''
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
+
         _sep = "\\', "
 
         #save the end char & split the rec into a list

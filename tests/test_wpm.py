@@ -52,28 +52,55 @@ class TestWPM():
 #        wpm.config_parser_values()
 
 #        assert cfg.path,_responses[0])
-    #@pytest.mark.usefixtures("setup_cfg", "tdata")
-    def test_pre_pst_proc_rec(self,):
-        '''(wpm.test_pre_pst_proc) test the sql processing (syntax errors)'''
-        print('(test_wpm.pre_pst_proc)')
-        #_r = self.trec1_a.replace("""\', ""","~#~#")
-        #_r = _r.replace("~#~#'a","', 'a")
-        _q = re.split(r"\\\'\, ",cfg.tdata.trec1)
-        print('split',_q)
 
-        _x = re.findall(r'\"*(\\\'\, )*"',self.trec1_a)
+    def test_edit_rec(self,):
+        '''(wpm.test_edit_rec) parsing and editing of a record'''
+        print('(test_wpm.pre_pst_proc)')
+        print('oldpath',cfg.old_full_path)
+        print('newpath',cfg.new_full_path)
+
+        _r = self.wpm.edit_rec(cfg.tdata.trec1)
+        print('b4:',repr(cfg.tdata.trec1))
+        print('af:',repr(_r))
+        print('sb:',repr(cfg.tdata.trec1_b))
+
+        assert _r == cfg.tdata.trec1_b
+        assert 0
+
+#        print('test domain')
+#        _trec1 = self.wpm.edit_rec(cfg.tdata.tec1)
+#        assert cfg.tdata.trec1 == _trec1
+
+#        print('test domain without serialization')
+#        _trec3 = self.wpm.edit_rec(cfg.tdata.trec3)
+#        assert cfg.tdata.trec3 == _trec3
+
+#        print('test prefix')
+#        _trec2 = self.wpm.edit_rec(cfg.tdata.trec2)
+#        assert cfg.tdata.trec2 == _trec2
+
+#        print('test full path')
+#        _trec3 = self.wpm.edit_rec(cfg.tdata.trec3)
+#        assert cfg.tdata.trec3 == _trec3
+
+        assert False == True
+
+    @unittest.skip('')
+    def test_debug_parse_rtn(self,):
+        '''test code to check the parsing routines'''
+        print('(test_wpm.test_debug_parse_rtn)')
+        _r = self.trec1_a.replace("""\', ""","~#~#")
+        _r = _r.replace("~#~#'a","', 'a")
+        _q = re.split(r"\\\'\, ",cfg.tdata.trec1)
+        print('split-1',_q)
+        _q = re.split(r"\\\'\, ",cfg.tdata.trec4_a)
+        print('split-4a',_q)
+
+        _x = re.findall(r'\"*(\\\'\, )*"',cfg.tdata.trec4_a)
         print('find',_x)
 
-        _r = re.sub(r"\'\, ",r"~#~#",self.trec1_a)
-        #_r = self.wpm.pre_proc_rec(self.trec1_a)
-        print('b4:',self.trec1_a)
-        print('af:',_r)
-        print('sb:',self.trec1_b)
-        assert _r == self.trec1_b
-        _r = _r.replace("~#~#","""\\', """)
-        _r = self.wpm.pst_proc_rec(_r)
-        assert _r == self.trec1_a
-        assert 0
+        _r = re.sub(r"\'\, ",r"~#~#",cfg.tdata.trec4_a)
+
 
     @unittest.skip('')
     def test_process_sql(self,):
@@ -82,27 +109,6 @@ class TestWPM():
         self.wpm.process_sql_file()
         assert True == True
 
-    @unittest.skip('')
-    def test_edit_rec(self,):
-        '''(wpm.test_process_sql) test the sql processing '''
-        print('(test_wpm.edit_rec)')
-        print('test domain')
-        _trec1 = self.wpm.edit_rec(init.test_rec1)
-        assert init.test_rec1 == _trec1
-
-        print('test domain without serialization')
-        _trec3 = self.wpm.edit_rec(test_rec3)
-        assert test_rec3 == _trec3
-
-        print('test prefix')
-        _trec2 = self.wpm.edit_rec(test_rec2)
-        assert test_rec2 == _trec2
-
-        print('test full path')
-        _trec3 = self.wpm.edit_rec(test_rec3)
-        assert test_rec3 == _trec3
-
-        assert False == True
 
 
     @unittest.skip('')
