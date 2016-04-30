@@ -17,19 +17,8 @@ import wp_migrate.util as util
 import wp_migrate.flio as flio
 import wp_migrate.wp_migrate as wp_migrate
 
-#@pytest.mark.usefixtures("setup_cfg")
-def test_sample():
-    print('(t_wpm)this is a sample.')
-    print('newdom',cfg.new_domain)
-    print ('tdata-rec3',cfg.tdata.trec3)
-    assert cfg.new_domain == 'no domain'
-    assert cfg.tdata.trec1 == 'test data'
 
-#@pytest.mark.usefixtures("setup_cfg", "tdata")
 class TestWPM():
-
-    #pytest.fixture(autouse=True)
-
 
     def setup(self,):
         '''(wpm.setup) setup for each test'''
@@ -53,9 +42,33 @@ class TestWPM():
 
 #        assert cfg.path,_responses[0])
 
+    def test_scan_for_old_string(self,):
+        '''(wpm.test_scan_for_old_string) return true if old string found'''
+        print('(test_wpm.edit_rec)')
+        print('oldpath',cfg.old_full_path)
+        print('oldurl',cfg.old_url)
+        print('olddomain',cfg.old_domain)
+        print('rec',cfg.tdata.trec1)
+        _a = self.wpm.scan_for_old_strings(cfg.tdata.trec1)
+        assert _a == True
+
+    def test_replace_strings(self,):
+        '''(wpm.test_replace_strings) replace rec strings'''
+        print('(test_wpm.replace_strings)')
+        print('oldpath',cfg.old_full_path)
+        print('newpath',cfg.new_full_path)
+
+        _r = self.wpm.replace_strings(cfg.tdata.trec1)
+        print('b4:',repr(cfg.tdata.trec1))
+        print('af:',repr(_r))
+        print('sb:',repr(cfg.tdata.trec1_b))
+
+        assert _r == cfg.tdata.trec1_b
+
+
     def test_edit_rec(self,):
         '''(wpm.test_edit_rec) parsing and editing of a record'''
-        print('(test_wpm.pre_pst_proc)')
+        print('(test_wpm.edit_rec)')
         print('oldpath',cfg.old_full_path)
         print('newpath',cfg.new_full_path)
 
@@ -65,25 +78,8 @@ class TestWPM():
         print('sb:',repr(cfg.tdata.trec1_b))
 
         assert _r == cfg.tdata.trec1_b
-        assert 0
 
-#        print('test domain')
-#        _trec1 = self.wpm.edit_rec(cfg.tdata.tec1)
-#        assert cfg.tdata.trec1 == _trec1
 
-#        print('test domain without serialization')
-#        _trec3 = self.wpm.edit_rec(cfg.tdata.trec3)
-#        assert cfg.tdata.trec3 == _trec3
-
-#        print('test prefix')
-#        _trec2 = self.wpm.edit_rec(cfg.tdata.trec2)
-#        assert cfg.tdata.trec2 == _trec2
-
-#        print('test full path')
-#        _trec3 = self.wpm.edit_rec(cfg.tdata.trec3)
-#        assert cfg.tdata.trec3 == _trec3
-
-        assert False == True
 
     @unittest.skip('')
     def test_debug_parse_rtn(self,):
@@ -109,15 +105,6 @@ class TestWPM():
         self.wpm.process_sql_file()
         assert True == True
 
-
-
-    @unittest.skip('')
-    def test_sample_skip(self,):
-        '''(wpm.sample_skip) test skip a test'''
-
-        print('(test_wpm.sample_skip)')
-
-        assert True == True
 
 
 

@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import sys, os, datetime, time, re
-#import pytest
+import pytest
 import wp_migrate.cfg as cfg
 import wp_migrate.util as util
 import wp_migrate.flio as flio
@@ -13,10 +13,11 @@ def teardown():
     print("TEAR DOWN!")
 
 class TestUtil():
-        @pytest.fixture(autouse=True)
+    @pytest.fixture(autouse=True)
 
     def setup(self,):
         '''(util.setup) setup for each test'''
+        pass
 
 
     def test_get_filelist(_path=cfg.path):

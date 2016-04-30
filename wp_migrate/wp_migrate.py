@@ -83,7 +83,7 @@ class WPMigrate(object):
     def edit_rec(self,_r):
         ''' scan and edit each record if appropriate'''
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         _sep = "\\', "
 
@@ -137,7 +137,7 @@ class WPMigrate(object):
 
     def scan_for_old_strings(self,_txt):
         ''' scan for text that needs to be changed and return true if so'''
-        #if re.search(cfg.old_domain,_txt) or re.search(cfg.old_tbl_prefix,_txt):
+
         _r = False
         if not cfg.old_domain in ['',None]:
             if re.search(cfg.old_domain,_txt):
@@ -148,7 +148,6 @@ class WPMigrate(object):
         if not cfg.old_url in ['',None]:
             if re.search(cfg.old_url,_txt):
                 _r = True
-        return _r
         if not cfg.old_full_path in ['',None]:
             if re.search(cfg.old_full_path,_txt):
                 _r = True
