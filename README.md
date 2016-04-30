@@ -61,23 +61,29 @@ To run the application:
 
     Other comments
 
-    This application should run under Python 2.7 or Python 3.3.
+    This application should run under Python 2.7 or Python 3.3 (not tested).
     See the requirements.txt file for Python module dependencies.
+
+## Testing ##
+
+    Tests are implemented with Pytest.  To run the tests, enter:
+    py.test
 
 ## Structure ##
 
 The application code in is the wp_migrate folder, data in the data folder and
 tests are in the tests folder.
 
-The data folder should contain sub-folders which hold the original files
-generated from the test.  All results related to the test are kept in the
+The data folder should contain sub-folders. A test sub-folder which is generated
+from the test.  All results related to the test are kept in the
 the sub-folder.
 
 
 ## Data ##
 
-The data/data folder will contain a sub-folder for each test.  Usually the folder
-name is the test number.
+The data/data folder will contain a sub-folder for each test and a unique folder
+for each site to be migrated.  Only one file ending with .sql should be in the
+folder to assure the correct sql file is processed.
 
 If you choose, you can put the sql file in any folder and provide the full path
 to the sql file at run time.
